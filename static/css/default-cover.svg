@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+  <rect width="300" height="400" fill="#e9ecef"/>
+  <g transform="translate(150,180)" text-anchor="middle">
+    <text font-family="sans-serif" font-size="48" fill="#adb5bd" y="0">&#x1F4D6;</text>
+    <text font-family="sans-serif" font-size="14" fill="#adb5bd" y="40">No Cover</text>
+  </g>
+</svg>

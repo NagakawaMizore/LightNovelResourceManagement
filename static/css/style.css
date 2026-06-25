@@ -1,0 +1,117 @@
+/* ── LNMS 轻小说资源管理系统 ── */
+
+:root {
+  --lnms-primary: #4a6fa5;
+  --lnms-accent: #f0a500;
+  --lnms-bg: #f5f6fa;
+}
+
+body {
+  background-color: var(--lnms-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* ── Navbar ── */
+.navbar {
+  background: linear-gradient(135deg, var(--lnms-primary), #3a5a8c) !important;
+}
+
+.navbar-brand {
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+}
+
+/* ── Section titles ── */
+.section-title {
+  position: relative;
+  padding-left: 14px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.section-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--lnms-accent);
+}
+
+/* ── Novel cards ── */
+.novel-card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.novel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.card-img-wrapper {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #e9ecef;
+}
+
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.novel-card:hover .card-img-wrapper img {
+  transform: scale(1.05);
+}
+
+.card-img-wrapper .badge {
+  font-size: 0.7rem;
+  z-index: 1;
+}
+
+/* ── Detail page ── */
+.detail-cover {
+  max-width: 300px;
+  border-radius: 8px;
+}
+
+/* ── Admin dashboard ── */
+.table th {
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #6c757d;
+}
+
+/* ── Forms ── */
+.form-label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+/* ── Responsive tweaks ── */
+@media (max-width: 576px) {
+  .card-img-wrapper {
+    aspect-ratio: 2 / 3;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+}

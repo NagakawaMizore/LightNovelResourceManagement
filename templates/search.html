@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}搜索 — LNMS{% endblock %}
+
+{% block content %}
+<h4 class="section-title mb-4">
+  <i class="bi bi-search me-1"></i>
+  {% if keyword %}搜索："{{ keyword }}"{% else %}搜索{% endif %}
+</h4>
+
+{% if novels is not none %}
+  {% if novels.items %}
+  <p class="text-muted mb-3">找到 {{ novels.total }} 条结果</p>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for novel in novels.items %}
+    <div class="col">
+      <a href="{{ url_for('main.novel_detail', novel_id=novel.id) }}" class="text-decoration-none">
+        <div class="card novel-card h-100 shadow-sm">
+          <div class="card-img-wrapper">
+            <img src="{{ novel.cover_or_default }}" class="card-img-top" alt="{{ novel.title }}">
+          </div>
+          <div class="card-body">
+            <h6 class="card-title text-dark mb-1 text-truncate">{{ novel.title }}</h6>
+            <p class="card-text text-muted small mb-1">{{ novel.author }}</p>
+            {% if novel.series %}
+            <span class="badge bg-info text-white">{{ novel.series }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if novels.pages > 1 %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% for p in novels.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <li class="page-item {% if p == novels.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('main.search', q=keyword, page=p) }}">{{ p }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center text-muted py-5">
+    <i class="bi bi-emoji-frown" style="font-size:3rem"></i>
+    <p class="mt-2">未找到匹配的轻小说</p>
+  </div>
+  {% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}首页 — LNMS{% endblock %}
+
+{% block content %}
+{# ── 推荐区 ── #}
+{% if recommended %}
+<section class="mb-5">
+  <h4 class="section-title mb-3">
+    <i class="bi bi-star-fill text-warning me-1"></i> 编辑推荐
+  </h4>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for novel in recommended %}
+    <div class="col">
+      <a href="{{ url_for('main.novel_detail', novel_id=novel.id) }}" class="text-decoration-none">
+        <div class="card novel-card h-100 shadow-sm">
+          <div class="card-img-wrapper">
+            <img src="{{ novel.cover_or_default }}" class="card-img-top" alt="{{ novel.title }}">
+            <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">推荐</span>
+          </div>
+          <div class="card-body">
+            <h6 class="card-title text-dark mb-1 text-truncate">{{ novel.title }}</h6>
+            <p class="card-text text-muted small mb-1">{{ novel.author }}</p>
+            {% if novel.series %}
+            <span class="badge bg-info text-white">{{ novel.series }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── 全部小说 ── #}
+<section>
+  <h4 class="section-title mb-3">
+    <i class="bi bi-collection me-1"></i> 全部轻小说
+  </h4>
+
+  {% if novels.items %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for novel in novels.items %}
+    <div class="col">
+      <a href="{{ url_for('main.novel_detail', novel_id=novel.id) }}" class="text-decoration-none">
+        <div class="card novel-card h-100 shadow-sm">
+          <div class="card-img-wrapper">
+            <img src="{{ novel.cover_or_default }}" class="card-img-top" alt="{{ novel.title }}">
+            {% if novel.is_recommended %}
+            <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">推荐</span>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <h6 class="card-title text-dark mb-1 text-truncate">{{ novel.title }}</h6>
+            <p class="card-text text-muted small mb-1">{{ novel.author }}</p>
+            {% if novel.series %}
+            <span class="badge bg-info text-white">{{ novel.series }}</span>
+            {% endif %}
+            {% if novel.rating %}
+            <div class="mt-1">
+              <small class="text-warning">
+                {% for _ in range(novel.rating | int) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                {% if novel.rating - novel.rating | int > 0 %}<i class="bi bi-star-half"></i>{% endif %}
+                <span class="text-muted ms-1">{{ "%.1f" | format(novel.rating) }}</span>
+              </small>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# pagination #}
+  {% if novels.pages > 1 %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% for p in novels.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <li class="page-item {% if p == novels.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('main.index', page=p) }}">{{ p }}</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center text-muted py-5">
+    <i class="bi bi-inbox" style="font-size:3rem"></i>
+    <p class="mt-2">暂无轻小说数据，{% if current_user.is_authenticated and current_user.is_admin %}
+      <a href="{{ url_for('admin.add_novel') }}">去上架</a>
+    {% else %}请稍后再来{% endif %}</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

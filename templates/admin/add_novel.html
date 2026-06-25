@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}上架新小说 — LNMS{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">管理后台</a></li>
+    <li class="breadcrumb-item active">上架新小说</li>
+  </ol>
+</nav>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white fw-bold">
+        <i class="bi bi-plus-circle me-1"></i> 上架新小说
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+
+          {# ── 基本信息 ── #}
+          <h6 class="text-muted mb-3">基本信息</h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-8">
+              <label class="form-label">标题 <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="title" required maxlength="255">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">作者 <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="author" required maxlength="100">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">系列</label>
+              <input type="text" class="form-control" name="series" maxlength="150"
+                     placeholder="留空表示单行本">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">评分 (0–5)</label>
+              <input type="number" class="form-control" name="rating" min="0" max="5" step="0.1" value="0">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="is_recommended" value="1" id="isRec">
+                <label class="form-check-label" for="isRec">首页推荐</label>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">简介</label>
+              <textarea class="form-control" name="summary" rows="4" placeholder="作品简介…"></textarea>
+            </div>
+          </div>
+
+          {# ── 封面 ── #}
+          <h6 class="text-muted mb-3">封面图片</h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">上传封面</label>
+              <input type="file" class="form-control" name="cover_file" accept=".jpg,.jpeg,.png,.gif,.webp">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">或填写外链 URL</label>
+              <input type="url" class="form-control" name="cover_url" placeholder="https://…">
+            </div>
+          </div>
+
+          {# ── 资源链接 ── #}
+          <h6 class="text-muted mb-3">
+            资源下载链接
+            <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="addLinkRow()">
+              <i class="bi bi-plus"></i> 添加链接
+            </button>
+          </h6>
+          <div id="links-container" class="mb-4">
+            <div class="link-row row g-2 mb-2">
+              <div class="col-md-3">
+                <input type="text" class="form-control form-control-sm" name="provider_name[]"
+                       placeholder="渠道名称 (如: 百度网盘)">
+              </div>
+              <div class="col-md-6">
+                <input type="url" class="form-control form-control-sm" name="download_url[]"
+                       placeholder="下载链接">
+              </div>
+              <div class="col-md-2">
+                <input type="text" class="form-control form-control-sm" name="access_code[]"
+                       placeholder="提取码">
+              </div>
+              <div class="col-md-1 d-flex align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLinkRow(this)">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-end">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary me-2">取消</a>
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-check-lg me-1"></i>确认上架
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function addLinkRow() {
+  const container = document.getElementById('links-container');
+  const row = document.createElement('div');
+  row.className = 'link-row row g-2 mb-2';
+  row.innerHTML = `
+    <div class="col-md-3">
+      <input type="text" class="form-control form-control-sm" name="provider_name[]"
+             placeholder="渠道名称 (如: 夸克网盘)">
+    </div>
+    <div class="col-md-6">
+      <input type="url" class="form-control form-control-sm" name="download_url[]"
+             placeholder="下载链接">
+    </div>
+    <div class="col-md-2">
+      <input type="text" class="form-control form-control-sm" name="access_code[]"
+             placeholder="提取码">
+    </div>
+    <div class="col-md-1 d-flex align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeLinkRow(this)">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+  `;
+  container.appendChild(row);
+}
+
+function removeLinkRow(btn) {
+  const rows = document.querySelectorAll('.link-row');
+  if (rows.length > 1) {
+    btn.closest('.link-row').remove();
+  }
+}
+</script>
+{% endblock %}
