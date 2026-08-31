@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}搜索 — LNMS{% endblock %}
+{% block title %}搜索 — YuriNovel{% endblock %}
 
 {% block content %}
 <h4 class="section-title mb-4">
@@ -7,36 +7,82 @@
   {% if keyword %}搜索："{{ keyword }}"{% else %}搜索{% endif %}
 </h4>
 
-{% if novels is not none %}
-  {% if novels.items %}
-  <p class="text-muted mb-3">找到 {{ novels.total }} 条结果</p>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-    {% for novel in novels.items %}
-    <div class="col">
-      <a href="{{ url_for('main.novel_detail', novel_id=novel.id) }}" class="text-decoration-none">
-        <div class="card novel-card h-100 shadow-sm">
-          <div class="card-img-wrapper">
-            <img src="{{ novel.cover_or_default }}" class="card-img-top" alt="{{ novel.title }}">
-          </div>
-          <div class="card-body">
-            <h6 class="card-title text-dark mb-1 text-truncate">{{ novel.title }}</h6>
-            <p class="card-text text-muted small mb-1">{{ novel.author }}</p>
-            {% if novel.series %}
-            <span class="badge bg-info text-white">{{ novel.series }}</span>
+{% if results is not none %}
+  {% if pagination and pagination.items %}
+  <p class="text-muted mb-3">找到 {{ pagination.total }} 条结果</p>
+  <div class="row g-4">
+    {% for item in results %}
+    {% set novel = item.novel %}
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body d-flex gap-3">
+          {# 封面缩略图 #}
+          <a href="{{ url_for('main.novel_detail', novel_id=novel.id) }}" class="flex-shrink-0">
+            <img src="{{ novel.cover_or_default }}" class="rounded"
+                 style="width:100px;height:133px;object-fit:cover" alt="{{ novel.title }}">
+          </a>
+          {# 文本信息 #}
+          <div class="flex-grow-1">
+            <h6 class="mb-1">
+              <a href="{{ url_for('main.novel_detail', novel_id=novel.id) }}" class="text-decoration-none">
+                {% if item.matches %}
+                  {% set ns = namespace(title_shown=false) %}
+                  {% for m in item.matches if m.field == 'title' and not ns.title_shown %}
+                    {{ m.value | safe }}
+                    {% set ns.title_shown = true %}
+                  {% endfor %}
+                  {% if not ns.title_shown %}{{ novel.title }}{% endif %}
+                {% else %}
+                  {{ novel.title }}
+                {% endif %}
+              </a>
+            </h6>
+
+            <p class="small text-muted mb-1">
+              {% if item.matches %}
+                {% set ns = namespace(author_shown=false) %}
+                {% for m in item.matches if m.field == 'author' and not ns.author_shown %}
+                  <span>作者：{{ m.value | safe }}</span>
+                  {% set ns.author_shown = true %}
+                {% endfor %}
+                {% if not ns.author_shown %}作者：{{ novel.author }}{% endif %}
+              {% else %}
+                作者：{{ novel.author }}
+              {% endif %}
+              {% if novel.series %} · {{ novel.series }}{% endif %}
+            </p>
+
+            {# 标签 #}
+            {% for tag in novel.tags.all() %}
+            <a class="tag-pill" href="{{ url_for('main.tag_filter', tag_name=tag.name) }}">{{ tag.name }}</a>
+            {% endfor %}
+
+            {# 命中分析 & Snippet #}
+            {% if item.matches %}
+              <div class="mt-2">
+                {% for m in item.matches %}
+                  {% if m.snippet %}
+                    <div class="search-snippet">{{ m.snippet | safe }}</div>
+                  {% elif m.value %}
+                    <span class="match-label">命中{{ m.label }}</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
             {% endif %}
           </div>
         </div>
-      </a>
+      </div>
     </div>
     {% endfor %}
   </div>
 
-  {% if novels.pages > 1 %}
+  {# 分页 #}
+  {% if pagination.pages > 1 %}
   <nav class="mt-4">
     <ul class="pagination justify-content-center">
-      {% for p in novels.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
         {% if p %}
-          <li class="page-item {% if p == novels.page %}active{% endif %}">
+          <li class="page-item {% if p == pagination.page %}active{% endif %}">
             <a class="page-link" href="{{ url_for('main.search', q=keyword, page=p) }}">{{ p }}</a>
           </li>
         {% else %}
@@ -51,6 +97,7 @@
   <div class="text-center text-muted py-5">
     <i class="bi bi-emoji-frown" style="font-size:3rem"></i>
     <p class="mt-2">未找到匹配的轻小说</p>
+    <p class="small">提示：评论内容不参与搜索</p>
   </div>
   {% endif %}
 {% endif %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ novel.title }} — LNMS{% endblock %}
+{% block title %}{{ novel.title }} — YuriNovel{% endblock %}
 
 {% block content %}
 <nav aria-label="breadcrumb" class="mb-3">
@@ -28,6 +28,16 @@
         <tr>
           <th class="text-muted">系列</th>
           <td>{{ novel.series }}</td>
+        </tr>
+        {% endif %}
+        {% if novel.tags.all() %}
+        <tr>
+          <th class="text-muted">标签</th>
+          <td>
+            {% for tag in novel.tags.all() %}
+            <a class="tag-pill" href="{{ url_for('main.tag_filter', tag_name=tag.name) }}">{{ tag.name }}</a>
+            {% endfor %}
+          </td>
         </tr>
         {% endif %}
         <tr>
@@ -118,7 +128,7 @@
     <i class="bi bi-chat-left-text me-1"></i> 读者评价
   </h5>
 
-  <form method="post" class="mb-4">
+  <form method="post" action="{{ url_for('main.add_comment', novel_id=novel.id) }}" class="mb-4">
     <div class="row g-2 mb-2">
       <div class="col-md-4">
         <input type="text" class="form-control form-control-sm" name="nickname"

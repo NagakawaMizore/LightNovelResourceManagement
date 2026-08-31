@@ -1,0 +1,43 @@
+# YuriNovel Systemd 服务文件
+# 使用方法：
+#   1. sudo cp deploy/lnms.service /etc/systemd/system/
+#   2. 修改 User / WorkingDirectory / ExecStart 中的路径
+#   3. sudo systemctl daemon-reload
+#   4. sudo systemctl enable lnms && sudo systemctl start lnms
+
+[Unit]
+Description=YuriNovel Resource Management (Gunicorn)
+After=network.target
+
+[Service]
+# TODO: 替换为实际的运行用户和项目路径
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/LightNovelResourceManagement
+
+# Gunicorn 启动命令
+ExecStart=/var/www/LightNovelResourceManagement/venv/bin/gunicorn \
+    -c gunicorn_config.py \
+    app:create_app \
+    --preload
+
+# 进程管理
+Restart=always
+RestartSec=5
+KillMode=mixed
+TimeoutStopSec=30
+
+# 环境变量（生产环境建议覆盖 SECRET_KEY）
+Environment=FLASK_ENV=production
+Environment=PYTHONUNBUFFERED=1
+
+# 安全加固
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/www/LightNovelResourceManagement/logs \
+                /var/www/LightNovelResourceManagement/static/uploads
+
+[Install]
+WantedBy=multi-user.target

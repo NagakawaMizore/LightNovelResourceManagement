@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}编辑小说 — LNMS{% endblock %}
+{% block title %}编辑小说 — YuriNovel{% endblock %}
 
 {% block content %}
 <nav aria-label="breadcrumb" class="mb-3">
@@ -51,6 +51,20 @@
             <div class="col-12">
               <label class="form-label">简介</label>
               <textarea class="form-control" name="summary" rows="4">{{ novel.summary or '' }}</textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">标签</label>
+              <input type="text" class="form-control" name="tags" id="tagInput"
+                     value="{{ novel_tag_names }}" placeholder="用逗号分隔，如：校园, 日常, 百合">
+              {% if all_tags %}
+              <div class="mt-2">
+                <small class="text-muted me-2">已有标签（点击快速填入）：</small>
+                {% for tag in all_tags %}
+                <button type="button" class="tag-pill" style="border:none"
+                        onclick="appendTag('{{ tag.name }}')">{{ tag.name }}</button>
+                {% endfor %}
+              </div>
+              {% endif %}
             </div>
           </div>
 
@@ -173,6 +187,13 @@ function removeLinkRow(btn) {
   if (rows.length > 1) {
     btn.closest('.link-row').remove();
   }
+}
+
+function appendTag(name) {
+  const input = document.getElementById('tagInput');
+  const cur = input.value.trim();
+  input.value = cur ? `${cur}, ${name}` : name;
+  input.focus();
 }
 </script>
 {% endblock %}

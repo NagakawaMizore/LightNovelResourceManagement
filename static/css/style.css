@@ -1,4 +1,4 @@
-/* ── LNMS 轻小说资源管理系统 ── */
+/* ── YuriNovel 轻小说资源管理系统 ── */
 
 :root {
   --lnms-primary: #4a6fa5;
@@ -114,4 +114,58 @@ main {
   .section-title {
     font-size: 1rem;
   }
+}
+
+/* ── Tag pills ── */
+.tag-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  margin: 2px 4px 2px 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  border-radius: 999px;
+  background: #e9ecef;
+  color: #495057;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.tag-pill:hover {
+  background: var(--lnms-primary);
+  color: #fff;
+  text-decoration: none;
+}
+.tag-pill-active {
+  background: var(--lnms-primary);
+  color: #fff;
+}
+
+/* ── Search highlight ── */
+mark {
+  background: #fff3cd;
+  color: #856404;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* ── Search result snippet ── */
+.search-snippet {
+  font-size: 0.85rem;
+  color: #495057;
+  background: #f8f9fa;
+  border-left: 3px solid var(--lnms-accent);
+  padding: 6px 10px;
+  margin-top: 6px;
+  border-radius: 0 4px 4px 0;
+}
+.match-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  margin-right: 6px;
+  border-radius: 3px;
+  background: #e7f1ff;
+  color: #0a58ca;
 }

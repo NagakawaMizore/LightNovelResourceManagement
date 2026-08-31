@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}标签管理 — YuriNovel{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">管理后台</a></li>
+    <li class="breadcrumb-item active">标签管理</li>
+  </ol>
+</nav>
+
+<div class="row">
+  {# 左侧：创建标签 #}
+  <div class="col-md-4 mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white fw-bold">
+        <i class="bi bi-plus-circle me-1"></i> 新建标签
+      </div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('admin.tag_add') }}">
+          <div class="mb-2">
+            <label class="form-label">标签名称</label>
+            <input type="text" class="form-control" name="name" required maxlength="50"
+                   placeholder="如：校园">
+          </div>
+          <button class="btn btn-primary w-100" type="submit">创建</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# 右侧：标签列表 #}
+  <div class="col-md-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-light fw-bold d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-tags me-1"></i> 全部标签（{{ tags | length }}）</span>
+      </div>
+      <div class="card-body">
+        {% if tags %}
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-2">
+          {% for tag in tags %}
+          <div class="col">
+            <div class="border rounded p-2 d-flex justify-content-between align-items-center">
+              <a href="{{ url_for('main.tag_filter', tag_name=tag.name) }}"
+                 class="text-decoration-none text-truncate" title="{{ tag.name }}">
+                {{ tag.name }}
+              </a>
+              <div class="d-flex align-items-center gap-1">
+                <button type="button" class="btn btn-sm btn-outline-secondary"
+                        data-bs-toggle="modal" data-bs-target="#editTagModal"
+                        data-tag-id="{{ tag.id }}" data-tag-name="{{ tag.name }}">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <form method="post" action="{{ url_for('admin.tag_delete', tag_id=tag.id) }}"
+                      onsubmit="return confirm('确认删除标签「{{ tag.name }}」？（绑定该标签的小说不会被删除）')">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4">暂无标签，在左侧创建第一个吧！</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# 编辑弹窗 #}
+<div class="modal fade" id="editTagModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" id="editTagForm">
+        <div class="modal-header">
+          <h5 class="modal-title">编辑标签</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label">标签名称</label>
+          <input type="text" class="form-control" name="name" id="editTagName" required maxlength="50">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+          <button type="submit" class="btn btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 使用 Bootstrap modal 事件 + data 属性，避免单引号转义问题
+const editModal = document.getElementById('editTagModal');
+editModal.addEventListener('show.bs.modal', function (event) {
+  const btn = event.relatedTarget;
+  const id = btn.getAttribute('data-tag-id');
+  const name = btn.getAttribute('data-tag-name');
+  document.getElementById('editTagName').value = name;
+  document.getElementById('editTagForm').action = `/admin/tags/${id}/edit`;
+});
+</script>
+{% endblock %}

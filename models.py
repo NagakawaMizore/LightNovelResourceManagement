@@ -6,6 +6,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 db = SQLAlchemy()
 
 
+# ── 多对多关联表：小说 ↔ 标签 ──────────────────────────────
+novel_tags = db.Table(
+    "novel_tags",
+    db.Column("novel_id", db.Integer, db.ForeignKey("novels.id"), primary_key=True),
+    db.Column("tag_id", db.Integer, db.ForeignKey("tags.id"), primary_key=True),
+)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
@@ -47,6 +55,9 @@ class Novel(db.Model):
         "Comment", backref="novel", lazy=True, cascade="all, delete-orphan",
         order_by="Comment.created_at.desc()",
     )
+    tags = db.relationship(
+        "Tag", secondary=novel_tags, backref="novels", lazy="dynamic"
+    )
 
     @property
     def cover_or_default(self) -> str:
@@ -71,3 +82,14 @@ class Comment(db.Model):
     nickname = db.Column(db.String(50), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Tag(db.Model):
+    __tablename__ = "tags"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self) -> str:
+        return f"<Tag {self.name}>"

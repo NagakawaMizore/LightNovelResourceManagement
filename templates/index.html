@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}首页 — LNMS{% endblock %}
+{% block title %}首页 — YuriNovel{% endblock %}
 
 {% block content %}
 {# ── 推荐区 ── #}
@@ -23,6 +23,9 @@
             {% if novel.series %}
             <span class="badge bg-info text-white">{{ novel.series }}</span>
             {% endif %}
+            {% for tag in novel.tags.all() %}
+            <a class="tag-pill" href="{{ url_for('main.tag_filter', tag_name=tag.name) }}">{{ tag.name }}</a>
+            {% endfor %}
           </div>
         </div>
       </a>
@@ -56,6 +59,9 @@
             {% if novel.series %}
             <span class="badge bg-info text-white">{{ novel.series }}</span>
             {% endif %}
+            {% for tag in novel.tags.all() %}
+            <a class="tag-pill" href="{{ url_for('main.tag_filter', tag_name=tag.name) }}">{{ tag.name }}</a>
+            {% endfor %}
             {% if novel.rating %}
             <div class="mt-1">
               <small class="text-warning">

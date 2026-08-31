@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+venv/
+.venv/
+.env
+
+# Flask / SQLite
+*.db
+*.sqlite
+instance/
+
+# Uploaded files at runtime
+static/uploads/*
+!static/uploads/.gitkeep
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp

@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from models import Novel, ResourceLink, db
+from models import Novel, ResourceLink, Tag, db
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -36,6 +36,19 @@ def _save_resource_links(novel_id: int, form) -> None:
                 access_code=code or None,
             )
             db.session.add(link)
+
+
+def _assign_tags(novel: Novel, raw_tags: str) -> None:
+    """根据逗号分隔的标签名字符串，为小说绑定标签（不存在则自动创建）。"""
+    tag_names = [t.strip() for t in raw_tags.replace("，", ",").split(",") if t.strip()]
+    tags = []
+    for name in tag_names:
+        tag = Tag.query.filter_by(name=name).first()
+        if tag is None:
+            tag = Tag(name=name)
+            db.session.add(tag)
+        tags.append(tag)
+    novel.tags = tags
 
 
 # ── Dashboard ──────────────────────────────────────────────
@@ -83,12 +96,14 @@ def add_novel():
         db.session.add(novel)
         db.session.flush()
         _save_resource_links(novel.id, request.form)
+        _assign_tags(novel, request.form.get("tags", ""))
         db.session.commit()
 
         flash("小说上架成功！", "success")
         return redirect(url_for("admin.dashboard"))
 
-    return render_template("admin/add_novel.html")
+    all_tags = Tag.query.order_by(Tag.name).all()
+    return render_template("admin/add_novel.html", all_tags=all_tags)
 
 
 # ── Edit Novel ─────────────────────────────────────────────
@@ -120,13 +135,20 @@ def edit_novel(novel_id):
         # rebuild links
         ResourceLink.query.filter_by(novel_id=novel.id).delete()
         _save_resource_links(novel.id, request.form)
+        _assign_tags(novel, request.form.get("tags", ""))
         db.session.commit()
 
         flash("更新成功！", "success")
         return redirect(url_for("admin.dashboard"))
 
     links = ResourceLink.query.filter_by(novel_id=novel_id).all()
-    return render_template("admin/edit_novel.html", novel=novel, links=links)
+    all_tags = Tag.query.order_by(Tag.name).all()
+    novel_tag_names = ",".join(t.name for t in novel.tags.all())
+    return render_template(
+        "admin/edit_novel.html",
+        novel=novel, links=links,
+        all_tags=all_tags, novel_tag_names=novel_tag_names,
+    )
 
 
 # ── Toggle Recommend ──────────────────────────────────────
@@ -151,3 +173,54 @@ def delete_novel(novel_id):
     db.session.commit()
     flash("小说已下架", "success")
     return redirect(url_for("admin.dashboard"))
+
+
+# ── Tag Management ─────────────────────────────────────────
+@admin_bp.route("/tags")
+@login_required
+@admin_required
+def tag_list():
+    tags = Tag.query.order_by(Tag.name).all()
+    return render_template("admin/tag_list.html", tags=tags)
+
+
+@admin_bp.route("/tags/add", methods=["POST"])
+@login_required
+@admin_required
+def tag_add():
+    name = request.form.get("name", "").strip()
+    if name:
+        if Tag.query.filter_by(name=name).first():
+            flash(f"标签 '{name}' 已存在", "warning")
+        else:
+            db.session.add(Tag(name=name))
+            db.session.commit()
+            flash("标签已创建", "success")
+    return redirect(url_for("admin.tag_list"))
+
+
+@admin_bp.route("/tags/<int:tag_id>/edit", methods=["POST"])
+@login_required
+@admin_required
+def tag_edit(tag_id):
+    tag = Tag.query.get_or_404(tag_id)
+    name = request.form.get("name", "").strip()
+    if name and name != tag.name:
+        if Tag.query.filter_by(name=name).first():
+            flash(f"标签 '{name}' 已存在", "warning")
+        else:
+            tag.name = name
+            db.session.commit()
+            flash("标签已更新", "success")
+    return redirect(url_for("admin.tag_list"))
+
+
+@admin_bp.route("/tags/<int:tag_id>/delete", methods=["POST"])
+@login_required
+@admin_required
+def tag_delete(tag_id):
+    tag = Tag.query.get_or_404(tag_id)
+    db.session.delete(tag)
+    db.session.commit()
+    flash(f"标签 '{tag.name}' 已删除", "success")
+    return redirect(url_for("admin.tag_list"))
