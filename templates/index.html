@@ -2,6 +2,27 @@
 {% block title %}首页 — YuriNovel{% endblock %}
 
 {% block content %}
+{# ── 首屏帘幕引导页（FR-02）：全屏遮罩 + 网站标题 + 进入按钮，背景图随机注入 ── #}
+<div id="splash-curtain" style="background-image: url('{{ bg_image_url }}');">
+  <div class="splash-overlay"></div>
+  <div class="splash-inner">
+    <h1 class="splash-title">YuriNovel</h1>
+    <p class="splash-subtitle">轻小说资源管理系统</p>
+    <button type="button" class="splash-enter-btn" id="splash-enter-btn">进入页面</button>
+  </div>
+</div>
+<script>
+  /* FR-05: 会话持久化判定 —— 已进入过则静默隐藏帘幕，否则锁定滚动 */
+  (function () {
+    var curtain = document.getElementById('splash-curtain');
+    if (sessionStorage.getItem('splash_entered') === 'true') {
+      curtain.style.display = 'none';
+    } else {
+      document.body.classList.add('splash-locked');
+    }
+  })();
+</script>
+
 {# ── 推荐区 ── #}
 {% if recommended %}
 <section class="mb-5">
@@ -104,4 +125,8 @@
   </div>
   {% endif %}
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
 {% endblock %}

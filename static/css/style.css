@@ -17,9 +17,14 @@ main {
   flex: 1;
 }
 
-/* ── Navbar ── */
-.navbar {
-  background: linear-gradient(135deg, var(--lnms-primary), #3a5a8c) !important;
+/* ── Navbar（FR-06 动态切片背景导航栏）──
+   背景图由 base.html 内联注入（暗色渐变 + 图片双图层）；
+   此处提供背景图缺失时的兜底底色与切片定位属性。 */
+.navbar.site-navbar {
+  background-color: #1f2d45;
+  background-position: top center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .navbar-brand {
@@ -168,4 +173,100 @@ mark {
   border-radius: 3px;
   background: #e7f1ff;
   color: #0a58ca;
+}
+
+/* ── 首屏帘幕引导页（FR-02 帘幕结构 / FR-03 雾化特效 / FR-04 上滑转场）── */
+
+/* 未点击进入前锁定主文档滚动 */
+body.splash-locked {
+  overflow: hidden;
+}
+
+/* 全屏帘幕容器：占满视口，背景图由 index.html 内联注入 */
+#splash-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1f2d45;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transform: translateY(0);
+  transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+
+/* FR-04: 点击进入后整体向上滑出视窗 */
+#splash-curtain.active {
+  transform: translateY(-100%);
+}
+
+/* FR-03: 雾化遮罩 —— blur(16px) + 半透明微白覆层 */
+.splash-overlay {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.25);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* FR-03: hover 进入按钮时滤镜与雾层平滑消退，露出高清原图。
+   第一条走 JS revealed 类路径；第二条为纯 CSS 原生 :hover 路径
+   （真实指针移动时由浏览器直接维护 hover 状态，不依赖 JS 事件）。 */
+#splash-curtain.revealed .splash-overlay,
+#splash-curtain:has(.splash-enter-btn:hover) .splash-overlay {
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  background: rgba(255, 255, 255, 0);
+}
+
+/* 帘幕中央内容 */
+.splash-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: #fff;
+  padding: 1rem;
+}
+
+.splash-title {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+  margin-bottom: 0.25em;
+}
+
+.splash-subtitle {
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  letter-spacing: 6px;
+  opacity: 0.92;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  margin-bottom: 2.5em;
+}
+
+/* FR-03: 幽灵描边"进入页面"按钮，hover 时发光填充 */
+.splash-enter-btn {
+  font-size: 1.05rem;
+  letter-spacing: 4px;
+  color: #fff;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  padding: 0.7em 3em;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.splash-enter-btn:hover,
+.splash-enter-btn:focus {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1f2d45;
+  border-color: #fff;
+  box-shadow: 0 0 32px rgba(255, 255, 255, 0.55);
+  outline: none;
 }
